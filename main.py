@@ -85,7 +85,7 @@ def main():
     parser = argparse.ArgumentParser(description='PyTorch graph convolutional neural net for whole-graph classification')
     parser.add_argument('--dataset', type=str, default="MUTAG",
                         help='name of dataset (default: MUTAG)')
-    parser.add_argument('--device', type=int, default=0,
+    parser.add_argument('--device', type=str, default=0,
                         help='which gpu to use if any (default: 0)')
     parser.add_argument('--batch_size', type=int, default=32,
                         help='input batch size for training (default: 32)')
@@ -128,8 +128,8 @@ def main():
     #set up seeds and gpu device
     torch.manual_seed(0)
     np.random.seed(0)
-    if str(args.device) != "cpu":
-        device = torch.device("cuda:" + str(args.device))\
+    if args.device != "cpu":
+        device = torch.device("cuda:" + args.device)\
                  if torch.cuda.is_available() else torch.device("cpu")
     else:
         device = torch.device("cpu")
