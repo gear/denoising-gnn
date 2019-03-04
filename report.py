@@ -6,14 +6,14 @@ import argparse
 def main():
     parser = argparse.ArgumentParser(description="Produce report from result files")
     parser.add_argument('--path', type=str, default="",
-                        help="Path to the result files (wildcards)")
+                        help="Path to the result files (* will be appended)")
     args = parser.parse_args()
     
     test_accuracies = []
     train_accuracies = []
     train_losses = []
     
-    for f in glob.glob(args.path):
+    for f in glob.glob(args.path+"*"):
         with open(f) as ff:
             loss, train_acc, test_acc = map(float, ff.readline().split())
             test_accuracies.append(test_acc)

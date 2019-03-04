@@ -153,7 +153,7 @@ def main():
             raise ValueError("T needs to be a single value or square matrix.")
         print("Corrupting training label with T:")
         print(T)
-        train_graphs = corrupt_label(train_graphs)
+        train_graphs = corrupt_label(train_graphs,T)
         
     model = GraphCNN(args.num_layers, args.num_mlp_layers, train_graphs[0].node_features.shape[1], args.hidden_dim, num_classes, args.final_dropout, args.learn_eps, args.graph_pooling_type, args.neighbor_pooling_type, device, args.bn, args.gbn).to(device)
 
