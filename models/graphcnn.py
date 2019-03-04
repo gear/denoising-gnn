@@ -34,6 +34,7 @@ class GraphCNN(nn.Module):
         self.eps = nn.Parameter(torch.zeros(self.num_layers-1))
         self.gbn = gbn
         self.bn = bn
+        self.num_classes = output_dim
 
         ###List of MLPs
         self.mlps = torch.nn.ModuleList()
