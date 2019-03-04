@@ -127,8 +127,12 @@ def main():
 
     #set up seeds and gpu device
     torch.manual_seed(0)
-    np.random.seed(0)    
-    device = torch.device("cuda:" + str(args.device)) if torch.cuda.is_available() else torch.device("cpu")
+    np.random.seed(0)
+    if str(args.device) != "cpu":
+        device = torch.device("cuda:" + str(args.device))\
+                 if torch.cuda.is_available() else torch.device("cpu")
+    else:
+        device = torch.device("cpu")
     if torch.cuda.is_available():
         torch.cuda.manual_seed_all(0)
 
