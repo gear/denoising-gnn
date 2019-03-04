@@ -30,7 +30,7 @@ def _get_weighted(arr):
         Randomly get the element index weighted by the value in the list
         arr: input array, sum of elements in the array should be 1. 
     '''
-    assert sum(arr) == 1, "I'm too lazy to implement the proper random!" 
+    assert 0.9 <= sum(arr) <= 1.1, "I'm too lazy to implement the proper random!" 
     # get a uniform random number in [0,1)
     r = np.random.random() 
     for i, v in enumerate(arr):
@@ -54,7 +54,7 @@ def corrupt_label(graph_list, T):
         if label != new_label:
             g.label = new_label
             total_change += 1
-    print("Corrupted: {} out of {}. {.2f}".format(total_change, \
+    print("Corrupted: {} out of {}. {}".format(total_change, \
                                                   len(graph_list), \
                                                   total_change/len(graph_list)))
     return graph_list
