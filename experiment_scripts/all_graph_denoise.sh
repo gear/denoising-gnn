@@ -33,7 +33,7 @@ do
                                --fold_idx $fold \
                        --filename "$dname"_"$self_rate"_fold_$fold \
                                --corrupt_label \
-                               --T "$self_rate" \
+                               --N "$self_rate" \
                                --denoise estimate \
                                --correction $cor
                 > ./logs/"$dname"_"$self_rate"_"$cor".log
@@ -65,7 +65,7 @@ do
                        --filename "$dname"_"$self_rate"_fold_$fold \
                                --degree_as_tag \
                                --corrupt_label \
-                               --T "$self_rate" \
+                               --N "$self_rate" \
                                --denoise estimate \
                                --correction $cor
                 > ./logs/"$dname"_"$self_rate"_"$cor".log
