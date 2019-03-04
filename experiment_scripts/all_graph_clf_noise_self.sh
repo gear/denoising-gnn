@@ -31,7 +31,7 @@ do
                            --fold_idx $fold \
                        --filename "$dname"_self_"$self_rate"_result_fold_$fold \
                            --corrupt_label \
-                           --C "$self_rate" \
+                           --N "$self_rate" \
             > ./logs/"$dname"_self_"$self_rate".log
             echo Done.
         done
@@ -58,7 +58,7 @@ do
                        --filename "$dname"_self_"$self_rate"_result_fold_$fold \
                            --degree_as_tag \
                            --corrupt_label \
-                           --C "$self_rate" \
+                           --N "$self_rate" \
             > ./logs/"$dname"_self_"$self_rate".log
             echo Done.
         done
