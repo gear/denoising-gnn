@@ -185,45 +185,49 @@ def main():
         print("Corrupting training label with N:")
         print(N)
         train_graphs = corrupt_label(train_graphs, N)
-        
-    model = GraphCNN(args.num_layers, 
-                     args.num_mlp_layers, 
-                     train_graphs[0].node_features.shape[1], 
-                     args.hidden_dim, 
-                     num_classes, 
-                     args.final_dropout, 
-                     args.learn_eps, 
-                     args.graph_pooling_type, 
-                     args.neighbor_pooling_type, 
-                     device, args.bn, args.gbn).to(device)
 
-    optimizer = optim.Adam(model.parameters(), lr=args.lr)
-    scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=50, gamma=0.5)
+    if args.denoise != "exact":
+        model = GraphCNN(args.num_layers, 
+                         args.num_mlp_layers, 
+                         train_graphs[0].node_features.shape[1], 
+                         args.hidden_dim, 
+                         num_classes, 
+                         args.final_dropout, 
+                         args.learn_eps, 
+                         args.graph_pooling_type, 
+                         args.neighbor_pooling_type, 
+                         device, args.bn, args.gbn).to(device)
 
-    for epoch in range(1, args.epochs + 1):
-        scheduler.step()
+        optimizer = optim.Adam(model.parameters(), lr=args.lr)
+        scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=50, gamma=0.5)
 
-        avg_loss = train(args, model, device, train_graphs, optimizer, epoch)
-        acc_train, acc_test = test(args, model, device, train_graphs, 
-                                   test_graphs, epoch)
+        for epoch in range(1, args.epochs + 1):
+            scheduler.step()
 
-        if not args.filename == "":
-            with open(args.filename, 'w') as f:
-                f.write("%f %f %f" % (avg_loss, acc_train, acc_test))
-                f.write("\n")
-        print("")
+            avg_loss = train(args, model, device, train_graphs, optimizer, epoch)
+            acc_train, acc_test = test(args, model, device, train_graphs, 
+                                       test_graphs, epoch)
 
-        print(model.eps)
+            if not args.filename == "":
+                with open(args.filename, 'w') as f:
+                    f.write("%f %f %f" % (avg_loss, acc_train, acc_test))
+                    f.write("\n")
+            print("")
+
+            print(model.eps)
+    else:
+        model = None
     
     if args.denoise in ["estimate", "anchors", "exact"]:
         C = None
+        anchors = None
         if args.denoise == "estimate" or args.denoise == "anchors":
             anchors = _parse_anchors(args.anchors, train_graphs)
             C = estimate_C(model, train_graphs, anchors)
         elif args.denoise == "exact": 
             C = estimate_C(model, train_graphs, anchors, N)
 
-        criterio = None
+        criterion = None
         if args.correction == "backward":
             criterion = lambda x, y: backward_correction(x,
                                                          y,
