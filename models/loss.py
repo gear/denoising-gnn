@@ -45,6 +45,11 @@ def forward_correction_xentropy(output, labels, C, device, nclass):
     return -torch.mean(label_oh * torch.log(torch.matmul(output, C)))
 
 
+def compound_correction(output, labels, C, device, nclass):
+    return backward_correction(output, labels, C, device, nclass) + \
+           forward_correction_xentropy(output, labels, C, device, nclass)
+
+
 def _C(model, candidates):
     '''
         Internal function to return the corruption matrix.
@@ -64,7 +69,7 @@ def _C(model, candidates):
     return C
 
 
-def estimate_C(model, graphs, anchors=None, C=None):
+def estimate_C(model, graphs, anchors=None, C=None, est_mode="max"):
     '''
         Estimate the class corruption matrix C.
         There are 3 schemes:
@@ -76,6 +81,7 @@ def estimate_C(model, graphs, anchors=None, C=None):
         graphs: training input graphs.
         anchors: list or dict of nodes with exact label.
         C: exact corruption matrix. 
+        est_mode: mode of estimation
     '''
     # Scheme 2 and 3
     if C is not None:
@@ -94,10 +100,19 @@ def estimate_C(model, graphs, anchors=None, C=None):
         n_classes = model.num_classes 
         scores, idx = model(graphs).max(dim=1)
         candidates = dict()
-        zeros = torch.zeros_like(scores)
+        min_val = torch.min(scores)
+        max_val = torch.max(scores)
+        temp = torch.ones_like(scores)
         for class_id in range(n_classes):
-            cand_id = torch.argmax(torch.where(idx==class_id,\
-                                               scores,\
-                                               zeros)) 
+            if est_mode == "max":
+                cand_id = torch.argmax(torch.where(idx==class_id,\
+                                                   scores,\
+                                                   temp*min_val)) 
+            elif est_mode == "min":
+                cand_id = torch.argmin(torch.where(idx==class_id,\
+                                                   scores,\
+                                                   temp*max_val)) 
+            else:
+                raise NotImplementedError("Should there be a better mode?")
             candidates[class_id] = graphs[cand_id] 
     return _C(model, candidates)
