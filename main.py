@@ -10,7 +10,7 @@ from tqdm import tqdm
 from util import load_data, separate_data, corrupt_label
 from models.graphcnn import GraphCNN
 from models.loss import estimate_C, backward_correction, \
-                        forward_correction_xentropy
+                        forward_correction_xentropy, compound_correction
 
 
 def _parse_anchors(str_anchors, g_list):
@@ -146,10 +146,13 @@ def main():
                         choices=["estimate", "anchors", "exact"],
                         help="Method to recover the noise matrix C.")
     parser.add_argument('--correction', type=str, default="backward",
-                        choices=["backward", "forward"],
+                        choices=["backward", "forward", "compound"],
                         help="Type of loss correction function.")
     parser.add_argument('--anchors', type=str, default="",
                         help="List of representative train data.")
+    parser.add_argument('--est_mode', default="max",
+                        choices=["max", "min"],
+                        help="Type of estimator for C")
     args = parser.parse_args()
 
     #set up seeds and gpu device
@@ -223,7 +226,7 @@ def main():
         anchors = None
         if args.denoise == "estimate" or args.denoise == "anchors":
             anchors = _parse_anchors(args.anchors, train_graphs)
-            C = estimate_C(model, train_graphs, anchors)
+            C = estimate_C(model, train_graphs, anchors, est_mode=args.est_mode)
         elif args.denoise == "exact": 
             C = estimate_C(model, train_graphs, anchors, N)
 
@@ -240,7 +243,12 @@ def main():
                                                           C,
                                                           device,
                                                           model.num_classes)
-
+        elif args.correction == "compound":
+            criterion = lambda x, y: compound_correction(x,
+                                                         y,
+                                                         C,
+                                                         device,
+                                                         model.num_classes)
         del model
         print("Training new denoising model")
         model = GraphCNN(args.num_layers, 
@@ -263,7 +271,8 @@ def main():
             acc_train, acc_test = test(args, model, device, train_graphs, 
                                        test_graphs, epoch)
             if not args.filename == "":
-                with open(args.denoise+'_'+args.correction+'_'+args.filename, 'w') as f:
+                with open(args.denoise+'_'+args.correction+'_'+args.est_mode\
+                          +'_'+args.filename, 'w') as f:
                     f.write("%f %f %f" % (avg_loss, acc_train, acc_test))
                     f.write("\n")
             print("")
