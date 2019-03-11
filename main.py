@@ -153,6 +153,8 @@ def main():
     parser.add_argument('--est_mode', default="max",
                         choices=["max", "min"],
                         help="Type of estimator for C")
+    parser.add_argument('--skip_new', action="store_true",
+                        help="Train new model for estimating noise")
     args = parser.parse_args()
 
     #set up seeds and gpu device
@@ -250,33 +252,34 @@ def main():
                                                          device,
                                                          model.num_classes)
         del model
-        print("Training new denoising model")
-        model = GraphCNN(args.num_layers, 
-                         args.num_mlp_layers, 
-                         train_graphs[0].node_features.shape[1], 
-                         args.hidden_dim, 
-                         num_classes, 
-                         args.final_dropout, 
-                         args.learn_eps, 
-                         args.graph_pooling_type, 
-                         args.neighbor_pooling_type, 
-                         device, args.bn, args.gbn).to(device)
-        optimizer = optim.Adam(model.parameters(), lr=args.lr)
-        scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=50, gamma=0.5)
-        for epoch in range(1, args.epochs + 1):
-            scheduler.step()
-            avg_loss = train(args, model, device, 
-                             train_graphs, optimizer, epoch,
-                             criterion)
-            acc_train, acc_test = test(args, model, device, train_graphs, 
-                                       test_graphs, epoch)
-            if not args.filename == "":
-                with open(args.denoise+'_'+args.correction+'_'+args.est_mode\
-                          +'_'+args.filename, 'w') as f:
-                    f.write("%f %f %f" % (avg_loss, acc_train, acc_test))
-                    f.write("\n")
-            print("")
-            print(model.eps)
+        if not args.skip_new:
+            print("Training new denoising model")
+            model = GraphCNN(args.num_layers, 
+                             args.num_mlp_layers, 
+                             train_graphs[0].node_features.shape[1], 
+                             args.hidden_dim, 
+                             num_classes, 
+                             args.final_dropout, 
+                             args.learn_eps, 
+                             args.graph_pooling_type, 
+                             args.neighbor_pooling_type, 
+                             device, args.bn, args.gbn).to(device)
+            optimizer = optim.Adam(model.parameters(), lr=args.lr)
+            scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=50, gamma=0.5)
+            for epoch in range(1, args.epochs + 1):
+                scheduler.step()
+                avg_loss = train(args, model, device, 
+                                 train_graphs, optimizer, epoch,
+                                 criterion)
+                acc_train, acc_test = test(args, model, device, train_graphs, 
+                                           test_graphs, epoch)
+                if not args.filename == "":
+                    with open(args.denoise+'_'+args.correction+'_'+args.est_mode\
+                              +'_'+args.filename, 'w') as f:
+                        f.write("%f %f %f" % (avg_loss, acc_train, acc_test))
+                        f.write("\n")
+                print("")
+                print(model.eps)
 
 if __name__ == '__main__':
     main()
