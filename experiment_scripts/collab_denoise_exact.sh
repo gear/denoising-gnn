@@ -11,12 +11,12 @@ num_mlp_layers=2
 hidden_dim=32
 final_dropout=0
 epochs=20
-for cor in backward forward compound
+for cor in forward compound
 do
     echo "====cor: $cor, C: exact===="
-    for rate in $(seq 0.05 0.05 0.95)
+    for rate in $(seq 0.1 0.2 0.9)
     do
-        for fold in $(seq 0 1 9)
+        for fold in $(seq 0 1 4)
         do
             python main.py --dataset COLLAB \
                            --epochs $epochs \

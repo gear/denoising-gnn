@@ -13,7 +13,7 @@ final_dropout=0
 epochs=20
 
 echo "====BIO-DATASETS===="
-for dname in MUTAG NCI1 PROTEINS PTC REDDITBINARY REDDITMULTI5K
+for dname in REDDITMULTI5K
 do
     echo Processing $dname...
     for fold in 0 1 2 3 4 5 6 7 8 9
@@ -30,14 +30,15 @@ do
                        --filename "$dname"_0.8_$fold \
                        --corrupt_label \
                        --N 0.8 \
-                       --denoise exact \
+                       --denoise estimate \
+                       --est_mode min \
         > ./logs/"$dname".log
         echo Done.
     done
 done
 
 echo "====SOCIAL-DATASETS===="
-for dname in IMDBBINARY IMDBMULTI COLLAB
+for dname in COLLAB
 do
     echo Processing $dname...
     for fold in 0 1 2 3 4 5 6 7 8 9
@@ -55,7 +56,8 @@ do
                        --degree_as_tag \
                        --corrupt_label \
                        --N 0.8 \
-                       --denoise exact \
+                       --denoise estimate \
+                       --est_mode min \
         > ./logs/"$dname".log
         echo Done.
     done
