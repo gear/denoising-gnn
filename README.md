@@ -1,7 +1,7 @@
 # Denoising Graph Neural Networks
 
 This repository is the implementation of Denoising Graph Neural Networks. This
-is original a fork of powerful-gnns (How Powerful are Graph Neural Networks - [arXiv](https://arxiv.org/abs/1810.00826) [OpenReview](https://openreview.net/forum?id=ryGs6iA5Km))
+is original a fork of powerful-gnns (How Powerful are Graph Neural Networks
 
 ## Installation
 Install PyTorch following the instuctions on the [official website] (https://pytorch.org/). The code has been tested over PyTorch 0.4.1 and 1.0.0 versions.
